@@ -8,7 +8,7 @@
 - Execute through `pi.exec` so the command uses the Pi loader's working directory. Windows uses `cmd.exe` with `/d /s /c`; other platforms use `bash -c`. Windows `bash` may launch WSL and fail with a logon error.
 - Validate `models.json` only after command success. Its directory is `PI_CODING_AGENT_DIR` when set (leading `~` expanded, relative paths resolved), otherwise `~/.pi/agent`. The `agentic-bus` output location must match it.
 - Validation accepts a leading UTF-8 BOM and checks readability and JSON syntax; model configuration and credentials remain Pi's responsibility.
-- Startup has no UI context: throw load errors for execution exceptions, nonzero exits, killed processes, or invalid/unreadable JSON. Successful loading stays silent. Existing diagnostics and documentation are in Portuguese.
+- Startup must keep execution and validation awaited inside the factory, but report exceptions, nonzero exits, killed processes, or invalid/unreadable JSON through `pi.ui.notify` without throwing, so Pi can continue loading. Successful loading stays silent. Existing diagnostics and documentation are in Portuguese.
 
 ## Verification
 

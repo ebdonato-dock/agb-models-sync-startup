@@ -15,6 +15,8 @@ export default async function modelsSyncStartup(pi) {
     : join(homedir(), ".pi", "agent");
   const modelsPath = join(agentDir, "models.json");
 
+  let failure;
+
   try {
     // O Pi aguarda a factory antes de atualizar o catálogo e escolher o modelo.
     // pi.exec usa o diretório de trabalho fornecido pelo loader do Pi.
@@ -30,18 +32,28 @@ export default async function modelsSyncStartup(pi) {
       throw new Error([reason, output].filter(Boolean).join("\n"));
     }
   } catch (error) {
-    // Ainda não há contexto de UI: o loader do Pi exibe o erro ao usuário.
-    throw new Error(
+    failure = new Error(
       `Falha ao executar ${command}:\n${error instanceof Error ? error.message : String(error)}`,
     );
   }
 
-  try {
-    const content = await readFile(modelsPath, "utf8");
-    JSON.parse(content.replace(/^\uFEFF/, ""));
-  } catch (error) {
-    throw new Error(
-      `O comando ${command} terminou, mas não foi possível ler um models.json válido em ${modelsPath}:\n${error instanceof Error ? error.message : String(error)}`,
-    );
+  if (!failure) {
+    try {
+      const content = await readFile(modelsPath, "utf8");
+      JSON.parse(content.replace(/^\uFEFF/, ""));
+    } catch (error) {
+      failure = new Error(
+        `O comando ${command} terminou, mas não foi possível ler um models.json válido em ${modelsPath}:\n${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  if (failure) {
+    const message = `A sincronização de modelos falhou. O Pi continuará disponível.\n${failure.message}`;
+    if (pi.ui?.notify) {
+      pi.ui.notify(message, "error");
+    } else {
+      process.stderr.write(`${message}\n`);
+    }
   }
 }

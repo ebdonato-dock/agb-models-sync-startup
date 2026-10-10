@@ -11,7 +11,7 @@ agentic-bus models sync
 - Executa o comando no diretório de trabalho do Pi, via `cmd.exe` no Windows e Bash nos demais sistemas.
 - Executa durante o carregamento assíncrono da extensão e aguarda o término do comando antes de concluir esse carregamento.
 - Confirma que o `models.json` existe, pode ser lido e contém JSON válido.
-- Em caso de falha do comando ou da validação, retorna um erro de carregamento da extensão, que o Pi reporta ao usuário com os detalhes disponíveis.
+- Em caso de falha do comando ou da validação, mostra uma notificação de erro, mas permite que o Pi continue iniciando.
 - Em caso de sucesso, não exibe notificações.
 
 ### Disponibilidade dos modelos na inicialização
@@ -61,7 +61,7 @@ Não é necessário compilar o arquivo nem instalar dependências adicionais par
 
 ## Feedback de erro
 
-Ainda não há interface disponível durante essa etapa. O feedback aparece como erro de carregamento da extensão, em vez de uma notificação do evento `session_start`. No CLI do Pi 1.1.0, erros de carregamento impedem a inicialização de continuar.
+Falhas na sincronização ou na validação são mostradas como uma notificação de erro depois que o Pi disponibiliza a interface, sem impedir a inicialização. Em ambientes sem a API de notificações, a mensagem é enviada para o stderr.
 
 Se o comando retornar um código diferente de zero, os detalhes incluem:
 
@@ -71,7 +71,7 @@ Código de saída: 1.
 <saída do comando>
 ```
 
-Execuções interrompidas e exceções durante a execução também são reportadas ao usuário. Se o comando terminar com sucesso, mas o arquivo estiver ausente, ilegível ou contiver JSON inválido, o erro informa o caminho esperado do `models.json`.
+Execuções interrompidas e exceções durante a execução também são reportadas ao usuário. Se o comando terminar com sucesso, mas o arquivo estiver ausente, ilegível ou contiver JSON inválido, a notificação informa o caminho esperado do `models.json`. O Pi continua utilizável mesmo nesses casos.
 
 ### Erro de logon do WSL no Windows
 
